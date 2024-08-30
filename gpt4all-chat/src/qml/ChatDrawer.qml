@@ -29,7 +29,7 @@ Rectangle {
 
     Item {
         anchors.top: parent.top
-        anchors.bottom: parent.bottom
+        anchors.bottom: removeAllButtonContainer.top
         anchors.left: parent.left
         anchors.right: borderRight.left
 
@@ -318,5 +318,110 @@ Rectangle {
                 Accessible.description: qsTr("List of chats in the drawer dialog")
             }
         }
+    }
+
+    Rectangle {
+        id: removeAllButtonContainer
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: 60
+        color: theme.viewBackground
+        border.color: theme.dividerColor
+        border.width: 1
+
+        Button {
+            id: removeAllButton
+            anchors.centerIn: parent
+            width: parent.width - 40
+            height: 40
+            text: qsTr("Remove All Chats")
+            font.pixelSize: theme.fontSizeLarger
+            color: "white"
+            background: Rectangle {
+                color: "red"
+                radius: 10
+            }
+            onClicked: {
+                removeAllConfirmation.visible = true
+            }
+            Accessible.name: qsTr("Remove all chats")
+            Accessible.description: qsTr("Button to remove all chats with confirmation")
+        }
+    }
+
+    Rectangle {
+        id: removeAllConfirmation
+        anchors.centerIn: parent
+        width: 300
+        height: 150
+        color: theme.viewBackground
+        radius: 10
+        visible: false
+        border.color: theme.dividerColor
+        border.width: 1
+        z: 100
+
+        Column {
+            anchors.centerIn: parent
+            spacing: 10
+
+            Text {
+                text: qsTr("Are you sure you want to remove all chats?")
+                font.pixelSize: theme.fontSizeLarger
+                color: theme.textColor
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            Row {
+                spacing: 20
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                Button {
+                    id: confirmRemoveAll
+                    text: qsTr("Yes")
+                    font.pixelSize: theme.fontSizeLarger
+                    color: "white"
+                    background: Rectangle {
+                        color: "red"
+                        radius: 10
+                    }
+                    onClicked: {
+                        removeAllChats()
+                        removeAllConfirmation.visible = false
+                    }
+                    Accessible.name: qsTr("Confirm remove all chats")
+                    Accessible.description: qsTr("Button to confirm the removal of all chats")
+                }
+
+                Button {
+                    id: cancelRemoveAll
+                    text: qsTr("No")
+                    font.pixelSize: theme.fontSizeLarger
+                    color: theme.textColor
+                    background: Rectangle {
+                        color: theme.viewBackground
+                        radius: 10
+                        border.color: theme.dividerColor
+                        border.width: 1
+                    }
+                    onClicked: {
+                        removeAllConfirmation.visible = false
+                    }
+                    Accessible.name: qsTr("Cancel remove all chats")
+                    Accessible.description: qsTr("Button to cancel the removal of all chats")
+                }
+            }
+        }
+
+        Accessible.name: qsTr("Confirmation dialog")
+        Accessible.description: qsTr("Dialog asking for confirmation to remove all chats")
+    }
+
+    function removeAllChats() {
+        for (var i = ChatListModel.count - 1; i >= 0; i--) {
+            ChatListModel.removeChat(ChatListModel.get(i))
+        }
+        Network.trackChatEvent("remove_all_chats")
     }
 }
